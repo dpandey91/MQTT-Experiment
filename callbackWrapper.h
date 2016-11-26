@@ -15,7 +15,7 @@ public:
 	virtual void connection_lost(const std::string& cause);
 
 	// We're not subscribed to anything, so this should never be called.
-	virtual void message_arrived(const std::string& topic, mqtt::message_ptr msg){}
+	virtual void message_arrived(const std::string& topic, mqtt::message_ptr msg);
 
 	virtual void delivery_complete(mqtt::idelivery_token_ptr tok);
 };

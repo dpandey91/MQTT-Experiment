@@ -16,7 +16,6 @@ PublisherWrapper::PublisherWrapper(const std::string& anAddress, int nQos, long 
   //pubtok(),
   cb()
 {
- // callback cb;
   client.set_callback(cb);
 }
   

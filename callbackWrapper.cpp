@@ -30,3 +30,9 @@ void CallbackWrapper::delivery_complete(mqtt::idelivery_token_ptr tok) {
 	long curPing = (usec2 - usec1);
 	std::cout << "After delivery_complete elapsed time for token " << tok->get_message_id() << " : " << curPing <<" microseconds " << std::endl;    
 }
+
+void CallbackWrapper::message_arrived(const std::string& topic, mqtt::message_ptr msg) {
+    std::cout << "Message arrived" << std::endl;
+    std::cout << "\ttopic: '" << topic << "'" << std::endl;
+    std::cout << "\t'" << msg->to_str() << "'\n" << std::endl;
+}

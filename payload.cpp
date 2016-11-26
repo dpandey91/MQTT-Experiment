@@ -61,7 +61,6 @@ const std::string Payload::getString(){
   boost::property_tree::write_json(ssOut, root);
 
   std::string outputStr = ssOut.str();
-  std::cout << "OUSTR: " << outputStr << std::endl;
   return outputStr;
 }
 
