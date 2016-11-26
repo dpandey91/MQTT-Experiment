@@ -1,0 +1,9 @@
+{
+  "address" : "tcp://localhost:1883",
+  "topic" : "hello",
+  "data" : "Hi I am publisher",
+  "qos" : 1,
+  "timeout" : 10000,
+  "noOfIterations" : 10,
+  "iterationDelay" : 1
+}

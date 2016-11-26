@@ -25,6 +25,7 @@ public:
   long getTimestamp();
   const std::string getString();
   void setDataInObject(std::string jsonString);
+//  void setValues(const std::string& aData, const std::string& aTopic, int nSeqNo, );
   
 private:
   std::string payloadData;

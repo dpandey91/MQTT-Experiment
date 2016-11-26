@@ -36,6 +36,7 @@ payload.o: payload.cpp payload.h
 
 .PHONY: clean
 clean:
+	rm -f *.o
 	rm -f async_pub
 
 .PHONY: distclean

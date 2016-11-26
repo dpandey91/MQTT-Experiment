@@ -16,11 +16,11 @@ void CallbackWrapper::connection_lost(const std::string& cause) {
 }
 
 void CallbackWrapper::delivery_complete(mqtt::idelivery_token_ptr tok) {
-	std::cout << "Delivery complete for token: " 
-		<< (tok ? tok->get_message_id() : -1) << std::endl;
+	//std::cout << "Delivery complete for token: " 
+	//	<< (tok ? tok->get_message_id() : -1) << std::endl;
 
 	std::string messageStr = tok->get_message()->get_payload();
-	std::cout << "Message is " << messageStr << std::endl;
+	//std::cout << "Message is " << messageStr << std::endl;
 	long usec2 = getCurrentMicrosecond();
 
 	Payload py;
@@ -28,6 +28,5 @@ void CallbackWrapper::delivery_complete(mqtt::idelivery_token_ptr tok) {
 	long usec1 = py.getTimestamp();
 
 	long curPing = (usec2 - usec1);
-	std::cout << "After delivery_complete elapsed time for" << py.getSeqNo() << ": " << curPing <<" microseconds " << std::endl;
-	    
+	std::cout << "After delivery_complete elapsed time for token " << tok->get_message_id() << " : " << curPing <<" microseconds " << std::endl;    
 }

@@ -60,12 +60,12 @@ bool PublisherWrapper::connectToBroker(){
 bool PublisherWrapper::publishData(const std::string& topic, const std::string payloadData){
     bool bPublished = false;
     try {
-        std::cout << "Sending next message..." << std::flush;
+        //std::cout << "Sending next message..." << std::flush;
 
         mqtt::message_ptr pubmsg = std::make_shared<mqtt::message>(payloadData);
 	pubmsg->set_qos(qos);
 	client.publish(topic, pubmsg)->wait_for_completion(timeout);
-	std::cout << "OK" << std::endl;
+	//std::cout << "OK" << std::endl;
         bPublished = true;
     }
     catch (const mqtt::exception& exc) {

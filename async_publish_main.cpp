@@ -2,33 +2,36 @@
 #include "payload.h"
 #include "common-utils.h"
 
-/*long getMicroseconds(struct timeval *t) {
-  return (t->tv_sec) * 1000000 + (t->tv_usec);
-}
-
-long getCurrentMicrosecond(){
-    struct timeval currentTime;
-    gettimeofday(&currentTime, NULL);
-    long usec = getMicroseconds(&currentTime);
-    return usec;
-}*/
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 //export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
 
 int main(int argc, char* argv[]){
+
+  try{
     
-    const std::string ADDRESS("tcp://localhost:1883");
-    const std::string TOPIC("hello");
-    const char* PAYLOAD1 = "Hello World!";
-    const int  QOS = 1;
-    const long TIMEOUT = 10000L;
+    if (argc != 2)    /* Test for correct number of arguments */
+    {
+	std::cerr << "Usage: " << argv[0] <<" <Json configuration file>" << std::endl;
+        exit(1);
+    }
+
+    boost::property_tree::ptree pt;
+    boost::property_tree::read_json(argv[1], pt);
     
-    int nSeqNo = 1;
+    const std::string ADDRESS = pt.get<std::string>("address");
+    const std::string TOPIC = pt.get<std::string>("topic");
+    //TODO: Handle reading data from input file if file name is specified
+    const std::string payloadData = pt.get<std::string>("data");
+    const int  QOS = pt.get<int>("qos");
+    const long TIMEOUT = pt.get<long>("timeout");
+    const long nIter = pt.get<long>("noOfIterations");
+    const double iterDelay = pt.get<double>("iterationDelay");
+
     bool bRet = false;
-    
-    Payload payload(PAYLOAD1, TOPIC, nSeqNo);
+
     PublisherWrapper publishWrapper(ADDRESS, QOS, TIMEOUT);
-    
     bRet = publishWrapper.connectToBroker();
     if(!bRet){
         std::cout << "Failed to connect to broker" << std::endl;
@@ -38,22 +41,32 @@ int main(int argc, char* argv[]){
       std::cout << "Connected to broker successfully" << std::endl;
     }
 
-    long usec1 = getCurrentMicrosecond();
-    payload.setTimestamp(usec1);
-    std::string payloadData = payload.getString();
+    //As now same data is published for nIter, setting data and its topic before iterations, else handle multiple parts of data to be published
+    Payload payload;
+    payload.setTopic(TOPIC);
+    payload.setData(payloadData);
     
-    bRet = publishWrapper.publishData(TOPIC, payloadData);
-    if(!bRet){
-        std::cout << "Failed to publish data to broker" << std::endl;
-        return 0;
-    }
-    else{
-      std::cout << "Published to broker successfully" << std::endl;
-    }
+    struct timespec reqDelay, remDelay;
+    for(int i = 0; i < nIter; i++){
+	payload.setSeqNo(i);
+	long usec1 = getCurrentMicrosecond();
+	payload.setTimestamp(usec1);
+	std::string payloadData = payload.getString();
 
-    long usec2 = getCurrentMicrosecond();
-    long curPing = (usec2 - usec1);
-    //printf("After publish in main elapsed time for (%d): %ld microseconds\n", nSeqNo, curPing);
+	bRet = publishWrapper.publishData(TOPIC, payloadData);
+	if(!bRet){
+		std::cout << "Failed to publish data to broker" << std::endl;
+		//TODO: Ask what to do incase of failure
+	}
+	else{
+		std::cout << "Published to broker successfully" << std::endl;
+	}
+	if(iterDelay > 0){
+		reqDelay.tv_sec = iterDelay;
+    		remDelay.tv_nsec = 0;
+		nanosleep((const struct timespec*)&reqDelay, &remDelay);
+	}
+    }
     
     bRet = publishWrapper.disconnetFromBroker();
     if(!bRet){
@@ -66,4 +79,17 @@ int main(int argc, char* argv[]){
     
     std::cout << "PublisherWrapper is successful" << std::endl;
     return 1;
+  }
+  catch (const mqtt::exception& exc) {
+    std::cerr << "Error: " << exc.what() << std::endl;
+    return 0;
+  }
+  catch (std::exception const& e)
+  {
+    std::cerr << e.what() << std::endl;
+  }
+  catch (...) {
+    std::cout << "Oops, someone threw an exception!" << std::endl;
+    return 0;
+  }
 }
