@@ -17,7 +17,7 @@ endif
 
 LDLIBS += -L../lib -L$(PAHO_C_LIB)/src/linux_ia64 -lmqttpp -lpaho-mqtt3a #-lmqttv3a
 
-OBJECTS = publisherWrapper.o subscriberWrapper.o callbackWrapper.o payload.o
+OBJECTS = publisherWrapper.o subscriberWrapper.o callbackWrapper.o payload.o calculateStats.o
 
 async_sub: async_subscribe_main.o $(OBJECTS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) async_subscribe_main.cpp -o async_sub $(OBJECTS) $(LDLIBS)
@@ -37,8 +37,11 @@ publisherWrapper.o: publisherWrapper.cpp publisherWrapper.h callbackWrapper.h
 subscriberWrapper.o: subscriberWrapper.cpp subscriberWrapper.h callbackWrapper.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c subscriberWrapper.cpp    
 
-callbackWrapper.o: callbackWrapper.cpp callbackWrapper.h
+callbackWrapper.o: callbackWrapper.cpp callbackWrapper.h calculateStats.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c callbackWrapper.cpp  
+    
+calculateStats.o: calculateStats.cpp calculateStats.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c calculateStats.cpp        
     
 payload.o: payload.cpp payload.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c payload.cpp    

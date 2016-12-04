@@ -20,6 +20,8 @@ int main(int argc, char* argv[]){
     boost::property_tree::ptree pt;
     boost::property_tree::read_json(argv[1], pt);
     
+    CalculateStats calc;
+    
     const std::string ADDRESS = pt.get<std::string>("address");
     const std::string TOPIC = pt.get<std::string>("topic");
     //TODO: Handle reading data from input file if file name is specified
@@ -48,24 +50,24 @@ int main(int argc, char* argv[]){
     
     struct timespec reqDelay, remDelay;
     for(int i = 0; i < nIter; i++){
-	payload.setSeqNo(i);
-	long usec1 = getCurrentMicrosecond();
-	payload.setTimestamp(usec1);
-	std::string payloadData = payload.getString();
+        payload.setSeqNo(i);
+        long usec1 = getCurrentMicrosecond();
+        payload.setTimestamp(usec1);
+        std::string payloadData = payload.getString();
 
-	bRet = publishWrapper.publishData(TOPIC, payloadData);
-	if(!bRet){
-		std::cout << "Failed to publish data to broker" << std::endl;
-		//TODO: Ask what to do incase of failure
-	}
-	else{
-		std::cout << "Published to broker successfully" << std::endl;
-	}
-	if(iterDelay > 0){
-		reqDelay.tv_sec = iterDelay;
-    		remDelay.tv_nsec = 0;
-		nanosleep((const struct timespec*)&reqDelay, &remDelay);
-	}
+        bRet = publishWrapper.publishData(TOPIC, payloadData);
+        if(!bRet){
+            std::cout << "Failed to publish data to broker" << std::endl;
+            //TODO: Ask what to do incase of failure
+        }
+        else{
+            std::cout << "Published to broker successfully" << std::endl;
+        }
+        if(iterDelay > 0){
+            reqDelay.tv_sec = iterDelay;
+                remDelay.tv_nsec = 0;
+            nanosleep((const struct timespec*)&reqDelay, &remDelay);
+        }
     }
     
     bRet = publishWrapper.disconnetFromBroker();
@@ -77,6 +79,8 @@ int main(int argc, char* argv[]){
       std::cout << "Disconnected from broker successfully" << std::endl;
     }
     
+    std::cout << "Average Latency is " << publishWrapper.getAvgLatency() << " for " << nIter << " messages." << std::endl;
+    std::cout << "Jitter is " << publishWrapper.getAvgJitter() << " for " << nIter << " messages." << std::endl;
     std::cout << "PublisherWrapper is successful" << std::endl;
     return 1;
   }

@@ -4,7 +4,15 @@
 #include "common-utils.h"
 
 CallbackWrapper::CallbackWrapper():
-  mqtt::callback()
+  mqtt::callback(),
+  calc(NULL)
+{ 
+	std::cout << "Called mqtt callback" << std::endl;
+}
+
+CallbackWrapper::CallbackWrapper(CalculateStats* c):
+  mqtt::callback(),
+  calc(c)
 { 
 	std::cout << "Called mqtt callback" << std::endl;
 }
@@ -16,9 +24,6 @@ void CallbackWrapper::connection_lost(const std::string& cause) {
 }
 
 void CallbackWrapper::delivery_complete(mqtt::idelivery_token_ptr tok) {
-	//std::cout << "Delivery complete for token: " 
-	//	<< (tok ? tok->get_message_id() : -1) << std::endl;
-
 	std::string messageStr = tok->get_message()->get_payload();
 	//std::cout << "Message is " << messageStr << std::endl;
 	long usec2 = getCurrentMicrosecond();
@@ -28,11 +33,15 @@ void CallbackWrapper::delivery_complete(mqtt::idelivery_token_ptr tok) {
 	long usec1 = py.getTimestamp();
 
 	long curPing = (usec2 - usec1);
-	std::cout << "After delivery_complete elapsed time for token " << tok->get_message_id() << " : " << curPing <<" microseconds " << std::endl;    
+    calc->addPLatencyToList(curPing);
+	//std::cout << "After delivery_complete elapsed time for token " << tok->get_message_id() << " : " << curPing <<" microseconds " << std::endl;    
 }
 
 void CallbackWrapper::message_arrived(const std::string& topic, mqtt::message_ptr msg) {
-    std::cout << "Message arrived" << std::endl;
+    //std::cout << "Message arrived" << std::endl;
     std::cout << "\ttopic: '" << topic << "'" << std::endl;
-    std::cout << "\t'" << msg->to_str() << "'\n" << std::endl;
+    //std::cout << "\t'" << msg->to_str() << "'\n" << std::endl;
+    
+    long usec2 = getCurrentMicrosecond();
+    calc->addMessageArrivalTime(usec2);
 }

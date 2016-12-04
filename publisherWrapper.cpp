@@ -13,8 +13,8 @@ PublisherWrapper::PublisherWrapper(const std::string& anAddress, int nQos, long 
   client(address, clientId),
   listener(),
   conntok(NULL),
-  //pubtok(),
-  cb()
+  calc(),
+  cb(&calc)
 {
   client.set_callback(cb);
 }
@@ -38,33 +38,12 @@ bool PublisherWrapper::connectToBroker(){
     return bConnect;
 }
 
-/*bool PublisherWrapper::publishData(const std::string& topic, const void* payload, size_t payloadLen){
-    bool bPublished = false;
-    try {
-        std::cout << "Sending next message..." << std::flush;
-        mqtt::idelivery_token_ptr pubtok;
-        mqtt::message_ptr pubmsg = std::make_shared<mqtt::message>(payload, payloadLen);
-        pubtok = client.publish(topic, pubmsg, nullptr, listener);
-        pubtok->wait_for_completion();
-        std::cout << "OK" << std::endl;
-        bPublished = true;
-    }
-    catch (const mqtt::exception& exc) {
-		std::cerr << "connectToBroker => Error: " << exc.what() << std::endl;
-		bPublished = false;
-	}
-    return bPublished;
-}*/
-
 bool PublisherWrapper::publishData(const std::string& topic, const std::string payloadData){
     bool bPublished = false;
     try {
-        //std::cout << "Sending next message..." << std::flush;
-
         mqtt::message_ptr pubmsg = std::make_shared<mqtt::message>(payloadData);
-	pubmsg->set_qos(qos);
-	client.publish(topic, pubmsg)->wait_for_completion(timeout);
-	//std::cout << "OK" << std::endl;
+        pubmsg->set_qos(qos);
+        client.publish(topic, pubmsg)->wait_for_completion(timeout);
         bPublished = true;
     }
     catch (const mqtt::exception& exc) {
@@ -78,10 +57,10 @@ bool PublisherWrapper::disconnetFromBroker(){
     bool bDisconnect = false;
     try{
         // Disconnect
-	std::cout << "Disconnecting..." << std::flush;
-	conntok = client.disconnect();
-	conntok->wait_for_completion();
-	std::cout << "OK" << std::endl;
+        std::cout << "Disconnecting..." << std::flush;
+        conntok = client.disconnect();
+        conntok->wait_for_completion();
+        std::cout << "OK" << std::endl;
         bDisconnect = true;
     }
     catch (const mqtt::exception& exc) {
@@ -89,4 +68,12 @@ bool PublisherWrapper::disconnetFromBroker(){
 		bDisconnect = false;
 	}
     return bDisconnect;
+}
+
+double PublisherWrapper::getAvgLatency(){
+    return calc.getAvgPLatency();
+}
+
+double PublisherWrapper::getAvgJitter(){
+    return calc.getAvgJitter();
 }
