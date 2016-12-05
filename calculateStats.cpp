@@ -52,22 +52,22 @@ double CalculateStats::getAvgPJitter(){
 }
 
 void CalculateStats::addMessageSentTime(long sentTime, int seqNo){
-    /*long noOfElements = messageSentTime.size();
+    long noOfElements = messageSentTime.size();
     if(noOfElements > 0){
         long lastElement = messageSentTime[seqNo-1];
         long interarrival = sentTime - lastElement;
         pInterarrivalTime[seqNo] = interarrival;
-    }*/
+    }
     messageSentTime[seqNo] = sentTime;
 }
 
 void CalculateStats::addMessageArrivalTime(long arrivalTime, int seqNo){
-    /*long noOfElements = messageArrivalTime.size();
+    long noOfElements = messageArrivalTime.size();
     if(noOfElements > 0){
         long lastElement = messageArrivalTime[seqNo-1];
         long interarrival = arrivalTime - lastElement;
         cInterarrivalTime[seqNo] = interarrival;
-    }*/
+    }
     messageArrivalTime[seqNo] = arrivalTime;
 }
 
