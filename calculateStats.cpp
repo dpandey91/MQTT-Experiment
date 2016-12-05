@@ -2,6 +2,8 @@
 #include <iostream>
 #include <cstdlib>
 
+#define DEBUG
+
 CalculateStats::CalculateStats():
   messageSentTime(),
   messageArrivalTime(),
@@ -146,7 +148,9 @@ void CalculateStats::printCJitter(){
 }
 
 void CalculateStats::printMessageSentTime(){
+#ifdef DEBUG    
     std::cout << "Sent time for messages are:" << std::endl;
+#endif    
     std::map<int, long>::iterator iter = messageSentTime.begin();
     while(iter != messageSentTime.end()){
         std::cout << iter->second << std::endl;
@@ -155,7 +159,9 @@ void CalculateStats::printMessageSentTime(){
 }
 
 void CalculateStats::printMessageArrivedTime(){
-    std::cout << "Sent time for messages are:" << std::endl;
+#ifdef DEBUG        
+    std::cout << "Arrival time for messages are:" << std::endl;
+#endif    
     std::map<int, long>::iterator iter = messageArrivalTime.begin();
     while(iter != messageArrivalTime.end()){
         std::cout << iter->second << std::endl;
@@ -165,10 +171,10 @@ void CalculateStats::printMessageArrivedTime(){
 
 void CalculateStats::printPStats(){
     printMessageSentTime();
-    printPInterarrivalTimes();
+    //printPInterarrivalTimes();
 }
 
 void CalculateStats::printCStats(){
     printMessageArrivedTime();
-    printCInterarrivalTimes();
+    //printCInterarrivalTimes();
 }

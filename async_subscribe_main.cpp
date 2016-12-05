@@ -5,6 +5,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
+#define DEBUG_2
+
 //export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
 
 int main(int argc, char* argv[]){
@@ -43,22 +45,30 @@ int main(int argc, char* argv[]){
         //TODO: Ask what to do incase of failure
     }
     else{
-        std::cout << "Published to broker successfully" << std::endl;
+#ifdef DEBUG_2        
+        std::cout << "Subscribed to broker successfully" << std::endl;
+#endif        
     }
 
-    while (std::tolower(std::cin.get()) != 'q')
+    while (std::tolower(std::cin.get()) != 'q');
     
+#ifdef DEBUG_2        
+    std::cout << "SubscriberWrapper is successful" << std::endl;
+#endif
+
+    subscriberWrapper.printAllStats();
     bRet = subscriberWrapper.disconnetFromBroker();
     if(!bRet){
         std::cout << "Failed to disconnet from broker" << std::endl;
         return 0;
     }
     else{
+#ifdef DEBUG_2                
       std::cout << "Disconnected from broker successfully" << std::endl;
+#endif      
     }
     
-    std::cout << "SubscriberWrapper is successful" << std::endl;
-    subscriberWrapper.printAllStats();
+    
     return 1;
   }
   catch (const mqtt::exception& exc) {

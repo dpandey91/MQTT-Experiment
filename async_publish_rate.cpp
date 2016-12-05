@@ -5,7 +5,12 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
+#include <sstream>
+#include <string>
+
 //export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
+
+//#define DEBUG_3
 
 int main(int argc, char* argv[]){
 
@@ -47,7 +52,7 @@ int main(int argc, char* argv[]){
       std::cout << "Connected to broker successfully" << std::endl;
     }
     
-    double timeoutAvg = interval/10;
+    double timeoutAvg = interval/10 * 1000;
     
     double currentTime = getCurrentSecond();
     double lastTokenTime = currentTime;
@@ -60,21 +65,28 @@ int main(int argc, char* argv[]){
         currentTime = getCurrentSecond();
         bucket += currentTime - lastTokenTime;
         lastTokenTime = currentTime;
-        
-        double loop_timeout = getRandDouble(timeoutAvg*3/4, timeoutAvg*5/4);
-        
+           
         if(bucket >= interval){
             bucket -= interval;
-            bRet = publishWrapper.publishData(TOPIC, payloadData, i++, loop_timeout);
+            bRet = publishWrapper.publishData(TOPIC, payloadData, i++);
             if(!bRet){
                 std::cout << "Failed to publish data to broker" << std::endl;
                 //TODO: Ask what to do incase of failure
             }
             else{
-                //std::cout << "Published to broker successfully" << std::endl;
+#ifdef DEBUG_3                
+                std::cout << "Published to broker successfully" << std::endl;
+#endif       
+
+                usleep(timeoutAvg);
             }    
         }
     }
+    
+#ifdef DEBUG_3            
+    std::cout << "PublisherWrapper is successful" << std::endl;
+#endif    
+    publishWrapper.printAllStats();
     
     bRet = publishWrapper.disconnetFromBroker();
     if(!bRet){
@@ -82,11 +94,11 @@ int main(int argc, char* argv[]){
         return 0;
     }
     else{
+#ifdef DEBUG_3        
       std::cout << "Disconnected from broker successfully" << std::endl;
+#endif      
     }
     
-    std::cout << "PublisherWrapper is successful" << std::endl;
-    publishWrapper.printAllStats();
     return 1;
   }
   catch (const mqtt::exception& exc) {

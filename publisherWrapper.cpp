@@ -6,6 +6,8 @@
 #include <cstring>
 #include "common-utils.h"
 
+//#define DEBUG_PUB
+
 PublisherWrapper::PublisherWrapper(const std::string& anAddress, int nQos, long nTimeout):
   clientId("AsyncPublisher"),
   address(anAddress),
@@ -27,9 +29,13 @@ bool PublisherWrapper::connectToBroker(){
     bool bConnect = false;
     try {
 		conntok = client.connect();
+#ifdef DEBUG_PUB        
 		std::cout << "Waiting for the connection..." << std::flush;
+#endif         
 		conntok->wait_for_completion();
+#ifdef DEBUG_PUB                
 		std::cout << "OK" << std::endl;
+#endif        
         bConnect = true;
     }
     catch (const mqtt::exception& exc) {
@@ -47,7 +53,7 @@ bool PublisherWrapper::publishData(const std::string& topic, const std::string p
         //Capturing here the timestamp to be more precise
         long usec = getCurrentMicrosecond();
         calc.addMessageSentTime(usec, nSeqNo);
-	std::cout << "Message sent: " << usec << std::endl;
+        //std::cout << "Message sent: " << usec << std::endl;
         client.publish(topic, pubmsg)->wait_for_completion(timeoutPub);
         bPublished = true;
     }
@@ -66,7 +72,7 @@ bool PublisherWrapper::publishData(const std::string& topic, const std::string p
         //Capturing here the timestamp to be more precise
         long usec = getCurrentMicrosecond();
         calc.addMessageSentTime(usec, nSeqNo);
-	std::cout << "Message sent: " << usec << std::endl;
+        //std::cout << "Message sent: " << usec << std::endl;
         client.publish(topic, pubmsg)->wait_for_completion(timeout);
         bPublished = true;
     }
@@ -81,10 +87,14 @@ bool PublisherWrapper::disconnetFromBroker(){
     bool bDisconnect = false;
     try{
         // Disconnect
+#ifdef DEBUG_PUB                        
         std::cout << "Disconnecting..." << std::flush;
+#endif        
         conntok = client.disconnect();
         conntok->wait_for_completion();
+#ifdef DEBUG_PUB                        
         std::cout << "OK" << std::endl;
+#endif        
         bDisconnect = true;
     }
     catch (const mqtt::exception& exc) {

@@ -5,6 +5,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
+#define DEBUG_MAIN
+
 //export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
 
 int main(int argc, char* argv[]){
@@ -56,7 +58,9 @@ int main(int argc, char* argv[]){
         return 0;
     }
     else{
+#ifdef DEBUG_1    
       std::cout << "Connected to broker successfully" << std::endl;
+#endif
     }
 
     //As now same data is published for nIter, setting data and its topic before iterations, else handle multiple parts of data to be published
@@ -76,7 +80,9 @@ int main(int argc, char* argv[]){
             //TODO: Ask what to do incase of failure
         }
         else{
-            //std::cout << "Published to broker successfully" << std::endl;
+#ifdef DEBUG_1             
+            std::cout << "Published to broker successfully" << std::endl;
+#endif            
         }
         if(iterDelay > 0){
             //The below commented code was using nanosecond but was considering on seconds.
@@ -97,8 +103,11 @@ int main(int argc, char* argv[]){
     else{
       std::cout << "Disconnected from broker successfully" << std::endl;
     }
-    
+
+#ifdef DEBUG_1     
     std::cout << "PublisherWrapper is successful" << std::endl;
+#endif
+ 
     publishWrapper.printAllStats();
     return 1;
   }
