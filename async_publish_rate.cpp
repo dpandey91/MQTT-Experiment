@@ -50,7 +50,7 @@ int main(int argc, char* argv[]){
     double currentTime = getCurrentSecond();
     double lastTokenTime = currentTime;
     double bucket = 0.0;
-
+    int i = 0;
     //As now same data is published for nIter, setting data and its topic before iterations, else handle multiple parts of data to be published
     //struct timespec reqDelay, remDelay;
     while(true){
@@ -61,7 +61,7 @@ int main(int argc, char* argv[]){
         
         if(bucket >= interval){
             bucket -= interval;
-            bRet = publishWrapper.publishData(TOPIC, payloadData, i);
+            bRet = publishWrapper.publishData(TOPIC, payloadData, i++);
             if(!bRet){
                 std::cout << "Failed to publish data to broker" << std::endl;
                 //TODO: Ask what to do incase of failure
