@@ -12,4 +12,4 @@ while read compareFile1 <&3 && read compareFile2 <&4; do
 #echo $compareFile2
 
  #fi 
-done 3<cOut.txt 4<pOut.txt
+done 3<cOutTime.txt 4<pOutTime.txt

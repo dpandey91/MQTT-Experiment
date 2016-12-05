@@ -39,6 +39,25 @@ bool PublisherWrapper::connectToBroker(){
     return bConnect;
 }
 
+bool PublisherWrapper::publishData(const std::string& topic, const std::string payloadData, int nSeqNo, int timeoutPub){
+    bool bPublished = false;
+    try {
+        mqtt::message_ptr pubmsg = std::make_shared<mqtt::message>(payloadData);
+        pubmsg->set_qos(qos);
+        //Capturing here the timestamp to be more precise
+        long usec = getCurrentMicrosecond();
+        calc.addMessageSentTime(usec, nSeqNo);
+	std::cout << "Message sent: " << usec << std::endl;
+        client.publish(topic, pubmsg)->wait_for_completion(timeoutPub);
+        bPublished = true;
+    }
+    catch (const mqtt::exception& exc) {
+		std::cerr << "connectToBroker => Error: " << exc.what() << std::endl;
+		bPublished = false;
+	}
+    return bPublished;
+}
+
 bool PublisherWrapper::publishData(const std::string& topic, const std::string payloadData, int nSeqNo){
     bool bPublished = false;
     try {

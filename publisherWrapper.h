@@ -20,6 +20,7 @@ public:
   ~PublisherWrapper();
   
   bool connectToBroker();
+  bool publishData(const std::string& topic, const std::string payloadData, int nSeqNo, int timeoutPub);
   bool publishData(const std::string& topic, const std::string payloadData, int nSeqNo);
   bool disconnetFromBroker();
   void printAllStats();

@@ -47,6 +47,8 @@ int main(int argc, char* argv[]){
       std::cout << "Connected to broker successfully" << std::endl;
     }
     
+    double timeoutAvg = interval/10;
+    
     double currentTime = getCurrentSecond();
     double lastTokenTime = currentTime;
     double bucket = 0.0;
@@ -59,9 +61,11 @@ int main(int argc, char* argv[]){
         bucket += currentTime - lastTokenTime;
         lastTokenTime = currentTime;
         
+        double loop_timeout = getRandDouble(timeoutAvg*3/4, timeoutAvg*5/4);
+        
         if(bucket >= interval){
             bucket -= interval;
-            bRet = publishWrapper.publishData(TOPIC, payloadData, i++);
+            bRet = publishWrapper.publishData(TOPIC, payloadData, i++, loop_timeout);
             if(!bRet){
                 std::cout << "Failed to publish data to broker" << std::endl;
                 //TODO: Ask what to do incase of failure
