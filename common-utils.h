@@ -16,4 +16,8 @@ inline long getCurrentMicrosecond(){
     return usec;
 }
 
+inline double getCurrentSecond(){
+    return getCurrentMicrosecond()/1000000;
+}
+
 #endif //WRAPPER_COMMON_H

@@ -26,26 +26,14 @@ int main(int argc, char* argv[]){
     const std::string TOPIC = pt.get<std::string>("topic");
     const int  QOS = pt.get<int>("qos");
     const long TIMEOUT = pt.get<long>("timeout");
-    const long nIter = pt.get<long>("noOfIterations");
-    const double iterDelay = pt.get<double>("iterationDelay");
     
-    const int bMessageWithSize = pt.get<int>("messageWithSize");
+    const long dataRate = pt.get<long>("dataRate");
+    double interval = 1.0/dataRate;
     
     std::string payloadData;
-    Payload payload;
-    
-    if(bMessageWithSize == 1){
-        const char messageData = 'a';//pt.get<char>("data");
-        const int messageSize = pt.get<int>("messageSize");
-    
-        payloadData = std::basic_string<char>(messageSize, messageData);    
-    }
-    else{
-        //TODO: Handle reading data from input file if file name is specified
-        const std::string data = pt.get<std::string>("data");
-        payload.setTopic(TOPIC);
-        payload.setData(data);
-    }
+    const char messageData = pt.get<char>("data");
+    const int messageSize = pt.get<int>("messageSize");
+    payloadData = std::basic_string<char>(messageSize, messageData);    
     
     bool bRet = false;
 
@@ -58,33 +46,29 @@ int main(int argc, char* argv[]){
     else{
       std::cout << "Connected to broker successfully" << std::endl;
     }
+    
+    double currentTime = getCurrentSeconds();
+    double lastTokenTime = currentTime;
+    double bucket = 0.0;
 
     //As now same data is published for nIter, setting data and its topic before iterations, else handle multiple parts of data to be published
     //struct timespec reqDelay, remDelay;
-    for(int i = 0; i < nIter; i++){
+    while(true){
         
-        if(bMessageWithSize == 0){
-            long usec1 = getCurrentMicrosecond();
-            payload.setSeqNo(i);
-            payload.setTimestamp(usec1);
-            payloadData = payload.getString();
-        }
+        currentTime = getCurrentSeconds();
+        bucket += currentTime - lastTokenTime;
+        lastTokenTime = currentTime;
         
-        bRet = publishWrapper.publishData(TOPIC, payloadData, i);
-        if(!bRet){
-            std::cout << "Failed to publish data to broker" << std::endl;
-            //TODO: Ask what to do incase of failure
-        }
-        else{
-            //std::cout << "Published to broker successfully" << std::endl;
-        }
-        if(iterDelay > 0){
-            //The below commented code was using nanosecond but was considering on seconds.
-            //Changed it to use microseconds for iterationDelay
-            /*reqDelay.tv_sec = iterDelay;
-            remDelay.tv_nsec = 0;
-            nanosleep((const struct timespec*)&reqDelay, &remDelay);*/
-            usleep(iterDelay);
+        if(bucket >= interval){
+            bucket -= msg_interval
+            bRet = publishWrapper.publishData(TOPIC, payloadData, i);
+            if(!bRet){
+                std::cout << "Failed to publish data to broker" << std::endl;
+                //TODO: Ask what to do incase of failure
+            }
+            else{
+                //std::cout << "Published to broker successfully" << std::endl;
+            }    
         }
     }
     

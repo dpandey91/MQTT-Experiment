@@ -2,7 +2,7 @@
 
 PAHO_C_LIB ?= /home/fmp/static/opensrc/mqtt/paho/org.eclipse.paho.mqtt.c
 
-all: async_pub async_sub
+all: async_pub async_sub async_pubrate
 
 CXXFLAGS += -Wall -std=c++0x
 CPPFLAGS += -I.. -I$(PAHO_C_LIB)/src -I/home/dipika/Desktop/MQTT/mqtt-exp/mqtt-scripts/paho-eclipse/paho.mqtt.cpp/src/samples/sample_pub
@@ -21,6 +21,9 @@ OBJECTS = publisherWrapper.o subscriberWrapper.o callbackWrapper.o payload.o cal
 
 async_sub: async_subscribe_main.o $(OBJECTS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) async_subscribe_main.cpp -o async_sub $(OBJECTS) $(LDLIBS)
+
+async_pubrate: async_publish_rate.o $(OBJECTS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) async_publish_rate.cpp -o async_pubrate $(OBJECTS) $(LDLIBS)
     
 async_pub: async_publish_main.o $(OBJECTS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) async_publish_main.cpp -o async_pub $(OBJECTS) $(LDLIBS)    
