@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
+#include "common-utils.h"
 
 PublisherWrapper::PublisherWrapper(const std::string& anAddress, int nQos, long nTimeout):
   clientId("AsyncPublisher"),
@@ -38,11 +39,14 @@ bool PublisherWrapper::connectToBroker(){
     return bConnect;
 }
 
-bool PublisherWrapper::publishData(const std::string& topic, const std::string payloadData){
+bool PublisherWrapper::publishData(const std::string& topic, const std::string payloadData, int nSeqNo){
     bool bPublished = false;
     try {
         mqtt::message_ptr pubmsg = std::make_shared<mqtt::message>(payloadData);
         pubmsg->set_qos(qos);
+        //Capturing here the timestamp to be more precise
+        long usec = getCurrentMicrosecond();
+        calc.addMessageSentTime(usec, nSeqNo);
         client.publish(topic, pubmsg)->wait_for_completion(timeout);
         bPublished = true;
     }
@@ -70,10 +74,6 @@ bool PublisherWrapper::disconnetFromBroker(){
     return bDisconnect;
 }
 
-double PublisherWrapper::getAvgLatency(){
-    return calc.getAvgPLatency();
-}
-
-double PublisherWrapper::getAvgJitter(){
-    return calc.getAvgJitter();
+void PublisherWrapper::printAllStats(){
+    calc.printPStats();
 }

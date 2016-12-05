@@ -13,7 +13,8 @@ SubscriberWrapper::SubscriberWrapper(const std::string& anAddress, int nQos, lon
   client(address, clientId),
   listener(),
   conntok(NULL),
-  cb()
+  calc(),
+  cb(&calc)
 {
   client.set_callback(cb);
 }
@@ -45,7 +46,7 @@ bool SubscriberWrapper::subscribeData(const std::string& topic){
 			<< " using QoS" << qos << "\n\n"
 			<< "Press Q<Enter> to quit\n" << std::endl;
 
-	client.subscribe(topic, qos);
+        client.subscribe(topic, qos);
         bSubscribed = true;
     }
     catch (const mqtt::exception& exc) {
@@ -70,4 +71,8 @@ bool SubscriberWrapper::disconnetFromBroker(){
 		bDisconnect = false;
 	}
     return bDisconnect;
+}
+
+void SubscriberWrapper::printAllStats(){
+    calc.printCStats();
 }

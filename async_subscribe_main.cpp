@@ -57,7 +57,8 @@ int main(int argc, char* argv[]){
       std::cout << "Disconnected from broker successfully" << std::endl;
     }
     
-    std::cout << "PublisherWrapper is successful" << std::endl;
+    std::cout << "SubscriberWrapper is successful" << std::endl;
+    subscriberWrapper.printAllStats();
     return 1;
   }
   catch (const mqtt::exception& exc) {

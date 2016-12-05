@@ -23,7 +23,8 @@ public:
     
 private:
     CalculateStats* calc;
-    
+    unsigned pSeqNo;
+    unsigned cSeqNo;
 };
 
 #endif //CALLBACK_H

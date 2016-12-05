@@ -5,14 +5,18 @@
 
 CallbackWrapper::CallbackWrapper():
   mqtt::callback(),
-  calc(NULL)
+  calc(NULL),
+  pSeqNo(0),
+  cSeqNo(0)
 { 
 	std::cout << "Called mqtt callback" << std::endl;
 }
 
 CallbackWrapper::CallbackWrapper(CalculateStats* c):
   mqtt::callback(),
-  calc(c)
+  calc(c),
+  pSeqNo(0),
+  cSeqNo(0)
 { 
 	std::cout << "Called mqtt callback" << std::endl;
 }
@@ -24,24 +28,24 @@ void CallbackWrapper::connection_lost(const std::string& cause) {
 }
 
 void CallbackWrapper::delivery_complete(mqtt::idelivery_token_ptr tok) {
-	std::string messageStr = tok->get_message()->get_payload();
-	//std::cout << "Message is " << messageStr << std::endl;
-	long usec2 = getCurrentMicrosecond();
+	//std::string messageStr = tok->get_message()->get_payload();
+	//long usec2 = getCurrentMicrosecond();
 
-	Payload py;
-	py.setDataInObject(messageStr);
-	long usec1 = py.getTimestamp();
+	//Payload py;
+	//py.setDataInObject(messageStr);
+	//long usec1 = py.getTimestamp();
 
-	long curPing = (usec2 - usec1);
-    calc->addPLatencyToList(curPing);
+	//long curPing = (usec2 - usec1);
+    
+    //calc->addPLatencyToList(curPing, pSeqNo);
+    //pSeqNo++;
 	//std::cout << "After delivery_complete elapsed time for token " << tok->get_message_id() << " : " << curPing <<" microseconds " << std::endl;    
 }
 
 void CallbackWrapper::message_arrived(const std::string& topic, mqtt::message_ptr msg) {
-    //std::cout << "Message arrived" << std::endl;
-    std::cout << "\ttopic: '" << topic << "'" << std::endl;
-    //std::cout << "\t'" << msg->to_str() << "'\n" << std::endl;
     
+    //TODO: Don't know how to get sequence number here; thus defining a variable for sequence
     long usec2 = getCurrentMicrosecond();
-    calc->addMessageArrivalTime(usec2);
+    calc->addMessageArrivalTime(usec2, cSeqNo);
+    cSeqNo++;
 }

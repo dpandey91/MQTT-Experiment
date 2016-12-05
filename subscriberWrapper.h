@@ -6,6 +6,7 @@
 #include "mqtt/async_client.h"
 #include "listenerWrapper.h"
 #include "callbackWrapper.h"
+#include "calculateStats.h"
 
 inline void sleep(int ms) {
 	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
@@ -21,6 +22,7 @@ public:
   bool connectToBroker();
   bool subscribeData(const std::string& topic);
   bool disconnetFromBroker();
+  void printAllStats();  
   
 private:
   std::string clientId;
@@ -30,6 +32,7 @@ private:
   mqtt::async_client client;
   action_listener listener;
   mqtt::itoken_ptr conntok;
+  CalculateStats calc;
   CallbackWrapper cb;
 };
 
