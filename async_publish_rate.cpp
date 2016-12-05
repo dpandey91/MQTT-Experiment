@@ -16,7 +16,7 @@ int main(int argc, char* argv[]){
 
   try{
     
-    if (argc != 2)    /* Test for correct number of arguments */
+    if (argc < 2)    /* Test for correct number of arguments */
     {
 	std::cerr << "Usage: " << argv[0] <<" <Json configuration file>" << std::endl;
         exit(1);
@@ -32,7 +32,15 @@ int main(int argc, char* argv[]){
     const int  QOS = pt.get<int>("qos");
     const long TIMEOUT = pt.get<long>("timeout");
     const long nIter = pt.get<long>("noOfIterations");    
-    const long dataRate = pt.get<long>("dataRate");
+
+    long dataRate = 0.0;
+    if(argc > 2)
+        dataRate = atol(argv[2]);
+    else
+        dataRate = pt.get<long>("dataRate");
+    std::cout << "datarate: " << dataRate << std::endl;
+
+
     double interval = 1.0/dataRate;
     
     std::string payloadData;
@@ -52,7 +60,7 @@ int main(int argc, char* argv[]){
       std::cout << "Connected to broker successfully" << std::endl;
     }
     
-    double timeoutAvg = interval/10 * 1000;
+    double timeoutAvg = (interval/10) / 1000000;
     
     double currentTime = getCurrentSecond();
     double lastTokenTime = currentTime;
@@ -78,7 +86,7 @@ int main(int argc, char* argv[]){
                 std::cout << "Published to broker successfully" << std::endl;
 #endif       
 
-                usleep(timeoutAvg);
+                //usleep(timeoutAvg);
             }    
         }
     }
