@@ -26,7 +26,7 @@ int main(int argc, char* argv[]){
     const std::string TOPIC = pt.get<std::string>("topic");
     const int  QOS = pt.get<int>("qos");
     const long TIMEOUT = pt.get<long>("timeout");
-    
+    const long nIter = pt.get<long>("noOfIterations");    
     const long dataRate = pt.get<long>("dataRate");
     double interval = 1.0/dataRate;
     
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]){
     int i = 0;
     //As now same data is published for nIter, setting data and its topic before iterations, else handle multiple parts of data to be published
     //struct timespec reqDelay, remDelay;
-    while(true){
+    while(i < nIter){
         
         currentTime = getCurrentSecond();
         bucket += currentTime - lastTokenTime;

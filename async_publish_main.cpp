@@ -35,7 +35,7 @@ int main(int argc, char* argv[]){
     Payload payload;
     
     if(bMessageWithSize == 1){
-        const char messageData = 'a';//pt.get<char>("data");
+        const char messageData = pt.get<char>("data");
         const int messageSize = pt.get<int>("messageSize");
     
         payloadData = std::basic_string<char>(messageSize, messageData);    
@@ -86,6 +86,7 @@ int main(int argc, char* argv[]){
             nanosleep((const struct timespec*)&reqDelay, &remDelay);*/
             usleep(iterDelay);
         }
+//        while (std::tolower(std::cin.get()) != 'p');
     }
     
     bRet = publishWrapper.disconnetFromBroker();
