@@ -149,7 +149,7 @@ void CalculateStats::printMessageSentTime(){
     std::cout << "Sent time for messages are:" << std::endl;
     std::map<int, long>::iterator iter = messageSentTime.begin();
     while(iter != messageSentTime.end()){
-        std::cout << iter->first << " " << iter->second << std::endl;
+        std::cout << iter->second << std::endl;
         iter++;
     }
 }
@@ -158,7 +158,7 @@ void CalculateStats::printMessageArrivedTime(){
     std::cout << "Sent time for messages are:" << std::endl;
     std::map<int, long>::iterator iter = messageArrivalTime.begin();
     while(iter != messageArrivalTime.end()){
-        std::cout << iter->first << " " << iter->second << std::endl;
+        std::cout << iter->second << std::endl;
         iter++;
     }
 }

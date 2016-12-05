@@ -46,7 +46,7 @@ void CallbackWrapper::message_arrived(const std::string& topic, mqtt::message_pt
     
     //TODO: Don't know how to get sequence number here; thus defining a variable for sequence
     long usec2 = getCurrentMicrosecond();
-    std::cout << "Message arrived: " << usec2 << std::endl;
+    //std::cout << "Message arrived: " << usec2 << std::endl;
     calc->addMessageArrivalTime(usec2, cSeqNo);
     cSeqNo++;
 }
