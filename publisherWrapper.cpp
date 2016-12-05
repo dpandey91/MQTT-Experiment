@@ -47,6 +47,7 @@ bool PublisherWrapper::publishData(const std::string& topic, const std::string p
         //Capturing here the timestamp to be more precise
         long usec = getCurrentMicrosecond();
         calc.addMessageSentTime(usec, nSeqNo);
+	std::cout << "Message sent: " << usec << std::endl;
         client.publish(topic, pubmsg)->wait_for_completion(timeout);
         bPublished = true;
     }

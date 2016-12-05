@@ -1,6 +1,6 @@
 {
-  "address" : "tcp://localhost:1883",
+  "address" : "tcp://10.10.1.1:1883",
   "topic" : "hello",
-  "qos" : 1,
+  "qos" : 0,
   "timeout" : 10000
 }

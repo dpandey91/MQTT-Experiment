@@ -1,11 +1,12 @@
 {
-  "address" : "tcp://localhost:1883",
+  "address" : "tcp://10.10.1.1:1883",
   "topic" : "hello",
   "messageWithSize" : 1,
-  "messageSize" : 256,
-  "data" : "Hi I am publisher",
-  "qos" : 1,
+  "messageSize" : 1000,
+  "data" : "a",
+  "qos" : 0,
   "timeout" : 10000,
-  "noOfIterations" : 1000,
-  "iterationDelay" : 1
+  "dataRate" : 500,
+  "noOfIterations" : 3,
+  "iterationDelay" : 1000000
 }
