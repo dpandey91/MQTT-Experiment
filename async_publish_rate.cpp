@@ -47,7 +47,7 @@ int main(int argc, char* argv[]){
       std::cout << "Connected to broker successfully" << std::endl;
     }
     
-    double currentTime = getCurrentSeconds();
+    double currentTime = getCurrentSecond();
     double lastTokenTime = currentTime;
     double bucket = 0.0;
 
@@ -55,12 +55,12 @@ int main(int argc, char* argv[]){
     //struct timespec reqDelay, remDelay;
     while(true){
         
-        currentTime = getCurrentSeconds();
+        currentTime = getCurrentSecond();
         bucket += currentTime - lastTokenTime;
         lastTokenTime = currentTime;
         
         if(bucket >= interval){
-            bucket -= msg_interval
+            bucket -= interval;
             bRet = publishWrapper.publishData(TOPIC, payloadData, i);
             if(!bRet){
                 std::cout << "Failed to publish data to broker" << std::endl;
