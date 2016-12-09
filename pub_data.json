@@ -1,12 +1,12 @@
 {
-  "address" : "tcp://10.10.1.1:1883",
+  "address" : "tcp://localhost:1883",
   "topic" : "bg_load",
-  "messageWithSize" : 1,
-  "messageSize" : 5000,
+  "messageSize" : 1000,
   "data" : "a",
   "qos" : 0,
   "timeout" : 10000,
   "dataRate" : 500,
-  "noOfIterations" : 1000,
-  "iterationDelay" : 1000
+  "noOfIterations" : 10,
+  "debug" : 1,
+  "sendMessageWithTs" : 1
 }

@@ -10,6 +10,9 @@
 class action_listener : public virtual mqtt::iaction_listener
 {
 protected:
+
+
+
 	virtual void on_failure(const mqtt::itoken& tok) {
 		std::cout << "\n\tListener: Failure on token: " 
 			<< tok.get_message_id() << std::endl;
@@ -18,7 +21,7 @@ protected:
 	virtual void on_success(const mqtt::itoken& tok) {
 		std::cout << "\n\tListener: Success on token: " 
 			<< tok.get_message_id() << std::endl;
-	}
+	}    
 };
 
 

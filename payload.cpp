@@ -53,7 +53,6 @@ long Payload::getTimestamp(){
 
 const std::string Payload::getString(){
   root.put("data", payloadData);
-  root.put("topic", topic);
   root.put("seqNo", seqNo);
   root.put("timestamp", timestamp);
 
@@ -65,12 +64,11 @@ const std::string Payload::getString(){
 }
 
 void Payload::setDataInObject(std::string jsonString){
-    std::stringstream ssInput;
-    ssInput << jsonString;
-    boost::property_tree::read_json(ssInput, root);
+   std::stringstream ssInput;
+   ssInput << jsonString;
+   boost::property_tree::read_json(ssInput, root);
 
    payloadData = root.get<std::string>("data");
-   topic = root.get<std::string>("topic");
    seqNo = root.get<int>("seqNo");
    timestamp = root.get<long>("timestamp");
 }

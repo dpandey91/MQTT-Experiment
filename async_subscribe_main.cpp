@@ -5,8 +5,6 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-#define DEBUG_2
-
 //export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
 
 int main(int argc, char* argv[]){
@@ -25,18 +23,21 @@ int main(int argc, char* argv[]){
     const std::string ADDRESS = pt.get<std::string>("address");
     const std::string TOPIC = pt.get<std::string>("topic");
     const int  QOS = pt.get<int>("qos");
-    const long TIMEOUT = pt.get<long>("timeout");
+    const int debugLevel = pt.get<int>("debug");
+    bool bSendMsgWithTs = (pt.get<int>("sendMessageWithTs") == 1) ? true : false;
     
     bool bRet = false;
 
-    SubscriberWrapper subscriberWrapper(ADDRESS, QOS, TIMEOUT);
+    SubscriberWrapper subscriberWrapper(debugLevel, ADDRESS, QOS, bSendMsgWithTs);
     bRet = subscriberWrapper.connectToBroker();
     if(!bRet){
         std::cout << "Failed to connect to broker" << std::endl;
         return 0;
     }
     else{
-      std::cout << "Connected to broker successfully" << std::endl;
+      if(debugLevel == 1){
+        std::cout << "Connected to broker successfully" << std::endl;    
+      }
     }
 
     bRet = subscriberWrapper.subscribeData(TOPIC);
@@ -45,29 +46,29 @@ int main(int argc, char* argv[]){
         //TODO: Ask what to do incase of failure
     }
     else{
-#ifdef DEBUG_2        
+      if(debugLevel == 1){
         std::cout << "Subscribed to broker successfully" << std::endl;
-#endif        
+      }
     }
 
+    //TODO: How to handle the subscribing event loop without this statement
     while (std::tolower(std::cin.get()) != 'q');
     
-#ifdef DEBUG_2        
-    std::cout << "SubscriberWrapper is successful" << std::endl;
-#endif
+    if(debugLevel == 1){
+      std::cout << "SubscriberWrapper is successful" << std::endl;
+    }
 
-    subscriberWrapper.printAllStats();
+    subscriberWrapper.printLatency();
     bRet = subscriberWrapper.disconnetFromBroker();
     if(!bRet){
         std::cout << "Failed to disconnet from broker" << std::endl;
         return 0;
     }
     else{
-#ifdef DEBUG_2                
-      std::cout << "Disconnected from broker successfully" << std::endl;
-#endif      
+      if(debugLevel == 1){
+        std::cout << "Disconnected from broker successfully" << std::endl;
+      }
     }
-    
     
     return 1;
   }

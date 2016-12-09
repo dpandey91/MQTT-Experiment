@@ -8,24 +8,19 @@
 #include "callbackWrapper.h"
 #include "calculateStats.h"
 
-inline void sleep(int ms) {
-	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-}
-
-
 class PublisherWrapper{
 
 public:
-  PublisherWrapper(const std::string& anAddress, int nQos, long nTimeout);
+  PublisherWrapper(int nDebugLevel, const std::string& anAddress, int nQos, long nTimeout, bool bMsgWithTs);
   ~PublisherWrapper();
   
   bool connectToBroker();
-  bool publishData(const std::string& topic, const std::string payloadData, int nSeqNo, int timeoutPub);
-  bool publishData(const std::string& topic, const std::string payloadData, int nSeqNo);
+  bool publishData(const std::string& topic, const std::string payloadData, int nSeqNo, int timeoutPub = -1);
   bool disconnetFromBroker();
   void printAllStats();
   
 private:
+  int debugLevel;
   std::string clientId;
   std::string address;
   int qos;
@@ -34,6 +29,7 @@ private:
   action_listener listener;
   mqtt::itoken_ptr conntok;
   CalculateStats calc;
+  bool msgWithTs;
   CallbackWrapper cb;
 };
 

@@ -2,56 +2,20 @@
 #include <iostream>
 #include <cstdlib>
 
-#define DEBUG
-
 CalculateStats::CalculateStats():
   messageSentTime(),
   messageArrivalTime(),
   pInterarrivalTime(),
   cInterarrivalTime(),
-  pJitter(),
+  latency(),
   cJitter(),
-  pLatency(),
-  cLatency(),
-  sumPLatency(0),
-  sumPJitter(0),
-  sumCLatency(0),
+  sumLatency(0),
   sumCJitter(0)
 {}
 
 CalculateStats::~CalculateStats()
 {}
     
-void CalculateStats::addPLatencyToList(long latency, long seqNo){
-    long noOfElements = pLatency.size();
-    if(noOfElements > 0){
-        long lastElement = pLatency[seqNo-1];
-        long jitterVal = abs(latency - lastElement);
-        pJitter[seqNo] = jitterVal;
-        sumPJitter += jitterVal;
-    }
-    
-    pLatency[seqNo] = latency;
-    sumPLatency += latency;
-}
-
-double CalculateStats::getAvgPLatency(){
-    long noOfElements = pLatency.size();
-    double averageLatency = -1;
-    if(noOfElements > 0){
-      averageLatency = sumPLatency/noOfElements;
-    }
-    return averageLatency;
-}
-
-double CalculateStats::getAvgPJitter(){
-    long noOfElements = pJitter.size();
-    double averageJitter = -1;
-    if(noOfElements > 0){
-      averageJitter = sumPJitter/noOfElements;        
-    }
-    return averageJitter;
-}
 
 void CalculateStats::addMessageSentTime(long sentTime, int seqNo){
     long noOfElements = messageSentTime.size();
@@ -79,27 +43,28 @@ void CalculateStats::calculateLatencyAtConsumer(){
         unsigned seqNo = iter->first;
         long sentTime = iter->second;
         long arrivalTime = messageArrivalTime[seqNo];
-        long latency = arrivalTime - sentTime;
+        long latencyVal = arrivalTime - sentTime;
         
-        cLatency[seqNo] = latency;
-        sumCLatency += latency;
+        latency[seqNo] = latencyVal;
+        sumLatency += latencyVal;
         
         if(seqNo > 0){
-            long lastLatency = cLatency[seqNo-1];
-            long jitterVal = abs(latency - lastLatency);
+            long lastLatency = latency[seqNo-1];
+            long jitterVal = abs(latencyVal - lastLatency);
             cJitter[seqNo] = jitterVal;
             sumCJitter += jitterVal;
         }
+        iter++;
     }
 }
 
-double CalculateStats::getAvgCLatency(){
-    long noOfElements = cLatency.size();
-    double averageCLatency = -1;
+double CalculateStats::getAvgLatency(){
+    long noOfElements = latency.size();
+    double averageLatency = -1;
     if(noOfElements > 0){
-      averageCLatency = sumCLatency/noOfElements;
+      averageLatency = sumLatency/noOfElements;
     }
-    return averageCLatency;
+    return averageLatency;
 }
 
 double CalculateStats::getAvgCJitter(){
@@ -129,52 +94,51 @@ void CalculateStats::printPInterarrivalTimes(){
     }
 }
 
-void CalculateStats::printCLatency(){
-    std::cout << "Latency for messages at consumer end are:" << std::endl;
-    std::map<int, long>::iterator iter = cLatency.begin();
-    while(iter != cLatency.end()){
-        std::cout << "Message: " << iter->first << " is " << iter->second << std::endl;
+void CalculateStats::printLatency(){
+    calculateLatencyAtConsumer();
+    std::cout << "Latency for messages calculated at consumer end are:" << std::endl;
+    std::map<int, long>::iterator iter = latency.begin();
+    while(iter != latency.end()){
+        std::cout << iter->first << " " << iter->second << std::endl;
         iter++;
     }
+    
+    std::cout << "Average Latency is " << getAvgLatency() << std::endl;
 }
 
 void CalculateStats::printCJitter(){
     std::cout << "Jitter for messages at consumer end are:" << std::endl;
     std::map<int, long>::iterator iter = cJitter.begin();
     while(iter != cJitter.end()){
-        std::cout << "Message: " << iter->first << " is " << iter->second << std::endl;
+        std::cout << iter->first << " " << iter->second << std::endl;
         iter++;
     }
 }
 
 void CalculateStats::printMessageSentTime(){
-#ifdef DEBUG    
     std::cout << "Sent time for messages are:" << std::endl;
-#endif    
     std::map<int, long>::iterator iter = messageSentTime.begin();
     while(iter != messageSentTime.end()){
-        std::cout << iter->second << std::endl;
+        std::cout << iter->first << " " << iter->second << std::endl;
         iter++;
     }
 }
 
 void CalculateStats::printMessageArrivedTime(){
-#ifdef DEBUG        
     std::cout << "Arrival time for messages are:" << std::endl;
-#endif    
     std::map<int, long>::iterator iter = messageArrivalTime.begin();
     while(iter != messageArrivalTime.end()){
-        std::cout << iter->second << std::endl;
+        std::cout << iter->first << " " << iter->second << std::endl;
         iter++;
     }
 }
 
 void CalculateStats::printPStats(){
     printMessageSentTime();
-    //printPInterarrivalTimes();
+    printPInterarrivalTimes();
 }
 
 void CalculateStats::printCStats(){
     printMessageArrivedTime();
-    //printCInterarrivalTimes();
+    printCInterarrivalTimes();
 }

@@ -12,8 +12,8 @@ class CallbackWrapper : public virtual mqtt::callback
 {
 public:
 
-	CallbackWrapper();
-    CallbackWrapper(CalculateStats* c);
+	CallbackWrapper(int nDebugLevel, bool bMsgWithTs);
+    CallbackWrapper(int nDebugLevel, bool bMsgWithTs, CalculateStats* c);
 	virtual void connection_lost(const std::string& cause);
 
 	// We're not subscribed to anything, so this should never be called.
@@ -23,6 +23,8 @@ public:
     
 private:
     CalculateStats* calc;
+    int debugLevel;
+    bool msgWithTs;
     unsigned pSeqNo;
     unsigned cSeqNo;
 };

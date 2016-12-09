@@ -5,94 +5,118 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-#define DEBUG_MAIN
+#include <sstream>
+#include <string>
 
 //export LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
 
-int main(int argc, char* argv[]){
+ int main(int argc, char* argv[]){
 
   try{
     
-    if (argc != 2)    /* Test for correct number of arguments */
+    if (argc < 2)    /* Test for correct number of arguments */
     {
-	std::cerr << "Usage: " << argv[0] <<" <Json configuration file>" << std::endl;
+        std::cerr << "Usage: " << argv[0] <<" <Json configuration file>" << std::endl;
         exit(1);
     }
 
     boost::property_tree::ptree pt;
     boost::property_tree::read_json(argv[1], pt);
     
-    CalculateStats calc;
-    
     const std::string ADDRESS = pt.get<std::string>("address");
     const std::string TOPIC = pt.get<std::string>("topic");
     const int  QOS = pt.get<int>("qos");
     const long TIMEOUT = pt.get<long>("timeout");
     const long nIter = pt.get<long>("noOfIterations");
-    const double iterDelay = pt.get<double>("iterationDelay");
+    const int debugLevel = pt.get<int>("debug");
+    bool bSendMsgWithTs = (pt.get<int>("sendMessageWithTs") == 1) ? true : false;
+        
+    long dataRate = 0.0;
+    if(argc > 2)
+        dataRate = atol(argv[2]);
+    else
+        dataRate = pt.get<long>("dataRate");
     
-    const int bMessageWithSize = pt.get<int>("messageWithSize");
+    double interval = 1.0/dataRate;
     
-    std::string payloadData;
-    Payload payload;
-    
-    if(bMessageWithSize == 1){
-        const char messageData = pt.get<char>("data");
-        const int messageSize = pt.get<int>("messageSize");
-    
-        payloadData = std::basic_string<char>(messageSize, messageData);    
-    }
-    else{
-        //TODO: Handle reading data from input file if file name is specified
-        const std::string data = pt.get<std::string>("data");
-        payload.setTopic(TOPIC);
-        payload.setData(data);
-    }
+    const char messageData = pt.get<char>("data");
+    const int messageSize = pt.get<int>("messageSize");
+    std::string payloadData = std::basic_string<char>(messageSize, messageData);
     
     bool bRet = false;
 
-    PublisherWrapper publishWrapper(ADDRESS, QOS, TIMEOUT);
+    PublisherWrapper publishWrapper(debugLevel, ADDRESS, QOS, TIMEOUT, bSendMsgWithTs);
     bRet = publishWrapper.connectToBroker();
     if(!bRet){
         std::cout << "Failed to connect to broker" << std::endl;
         return 0;
     }
     else{
-#ifdef DEBUG_1    
-      std::cout << "Connected to broker successfully" << std::endl;
-#endif
+      if(debugLevel == 1){
+        std::cout << "Connected to broker successfully" << std::endl;    
+      }
+    }
+    
+    double timeoutAvg = interval/10;
+    if(debugLevel == 1){
+        std::cout << "Timeout Avg bases on data rate : " << timeoutAvg << std::endl;
+    }
+    
+    double currentTime = getCurrentSecond();
+    double lastTokenTime = currentTime;
+    double bucket = 0.0;
+    int i = 0;
+
+    std::string sendMsg = "";
+    Payload payload;
+    
+    if(bSendMsgWithTs){
+        payload.setTopic(TOPIC);
+        payload.setData(payloadData);
     }
 
-    //As now same data is published for nIter, setting data and its topic before iterations, else handle multiple parts of data to be published
-    //struct timespec reqDelay, remDelay;
-    for(int i = 0; i < nIter; i++){
+    while(i < nIter){
         
-        if(bMessageWithSize == 0){
-            long usec1 = getCurrentMicrosecond();
-            payload.setSeqNo(i);
-            payload.setTimestamp(usec1);
-            payloadData = payload.getString();
+        currentTime = getCurrentSecond();
+        bucket += currentTime - lastTokenTime;
+        lastTokenTime = currentTime;
+           
+        if(bucket >= interval){
+            bucket -= interval;
+            
+            if(bSendMsgWithTs){
+                payload.setSeqNo(i);
+                
+                long usec1 = getCurrentMicrosecond();
+                payload.setTimestamp(usec1);
+                
+                //This returns a json string containing data, ts and segNo
+                sendMsg = payload.getString();
+            }
+            else{
+                sendMsg = payloadData;
+            }
+            
+            //Timeout avg interval is sent in ms as wait_for_completion call in publisher requires it in ms
+            bRet = publishWrapper.publishData(TOPIC, sendMsg, i++, timeoutAvg*1000);
+            if(!bRet){
+                std::cout << "Failed to publish data to broker" << std::endl;
+                //TODO: Ask what to do incase of failure
+            }
+            else{
+                if(debugLevel == 1){
+                  std::cout << "Published to broker successfully" << std::endl;
+                }
+            }    
         }
-        
-        bRet = publishWrapper.publishData(TOPIC, payloadData, i);
-        if(!bRet){
-            std::cout << "Failed to publish data to broker" << std::endl;
-            //TODO: Ask what to do incase of failure
-        }
-        else{
-#ifdef DEBUG_1             
-            std::cout << "Published to broker successfully" << std::endl;
-#endif            
-        }
-        if(iterDelay > 0){
-            //The below commented code was using nanosecond but was considering on seconds.
-            //Changed it to use microseconds for iterationDelay
-            /*reqDelay.tv_sec = iterDelay;
-            remDelay.tv_nsec = 0;
-            nanosleep((const struct timespec*)&reqDelay, &remDelay);*/
-            usleep(iterDelay);
-        }
-//        while (std::tolower(std::cin.get()) != 'p');
+    }
+    
+    if(debugLevel == 1){
+      std::cout << "PublisherWrapper is successful" << std::endl;
+    }
+    
+    if(!bSendMsgWithTs){
+        publishWrapper.printAllStats();
     }
     
     bRet = publishWrapper.disconnetFromBroker();
@@ -101,14 +125,10 @@ int main(int argc, char* argv[]){
         return 0;
     }
     else{
-      std::cout << "Disconnected from broker successfully" << std::endl;
+      if(debugLevel == 1){
+        std::cout << "Disconnected from broker successfully" << std::endl;
+      }
     }
-
-#ifdef DEBUG_1     
-    std::cout << "PublisherWrapper is successful" << std::endl;
-#endif
- 
-    publishWrapper.printAllStats();
     return 1;
   }
   catch (const mqtt::exception& exc) {

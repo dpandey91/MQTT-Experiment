@@ -6,9 +6,8 @@
 #include <cstring>
 #include "common-utils.h"
 
-//#define DEBUG_PUB
-
-PublisherWrapper::PublisherWrapper(const std::string& anAddress, int nQos, long nTimeout):
+PublisherWrapper::PublisherWrapper(int nDebugLevel, const std::string& anAddress, int nQos, long nTimeout, bool bMsgWithTs):
+  debugLevel(nDebugLevel),
   clientId("AsyncPublisher"),
   address(anAddress),
   qos(nQos),
@@ -17,7 +16,8 @@ PublisherWrapper::PublisherWrapper(const std::string& anAddress, int nQos, long 
   listener(),
   conntok(NULL),
   calc(),
-  cb(&calc)
+  msgWithTs(bMsgWithTs),
+  cb(debugLevel, msgWithTs, &calc)
 {
   client.set_callback(cb);
 }
@@ -29,13 +29,14 @@ bool PublisherWrapper::connectToBroker(){
     bool bConnect = false;
     try {
 		conntok = client.connect();
-#ifdef DEBUG_PUB        
-		std::cout << "Waiting for the connection..." << std::flush;
-#endif         
-		conntok->wait_for_completion();
-#ifdef DEBUG_PUB                
-		std::cout << "OK" << std::endl;
-#endif        
+        if(debugLevel == 1){
+          std::cout << "Waiting for the connection for publisher..." << std::flush;    
+        }
+		
+        conntok->wait_for_completion();
+        if(debugLevel == 1){
+          std::cout << "Connection completed" << std::endl;
+        }
         bConnect = true;
     }
     catch (const mqtt::exception& exc) {
@@ -45,39 +46,25 @@ bool PublisherWrapper::connectToBroker(){
     return bConnect;
 }
 
-bool PublisherWrapper::publishData(const std::string& topic, const std::string payloadData, int nSeqNo, int timeoutPub){
+bool PublisherWrapper::publishData(const std::string& topic, const std::string sendMsg, int nSeqNo, int timeoutPub){
     bool bPublished = false;
     try {
-        mqtt::message_ptr pubmsg = std::make_shared<mqtt::message>(payloadData);
+        mqtt::message_ptr pubmsg = std::make_shared<mqtt::message>(sendMsg);
         pubmsg->set_qos(qos);
-        //Capturing here the timestamp to be more precise
-        long usec = getCurrentMicrosecond();
-        calc.addMessageSentTime(usec, nSeqNo);
-        //std::cout << "Message sent: " << usec << std::endl;
+        
+        if(timeoutPub == -1) timeoutPub = timeout;
+        
+        if(!msgWithTs){
+          //Capturing here the timestamp to be more precise when message is sent without ts
+          long usec = getCurrentMicrosecond();
+          calc.addMessageSentTime(usec, nSeqNo);
+        }
+        
         client.publish(topic, pubmsg)->wait_for_completion(timeoutPub);
         bPublished = true;
     }
     catch (const mqtt::exception& exc) {
-		std::cerr << "connectToBroker => Error: " << exc.what() << std::endl;
-		bPublished = false;
-	}
-    return bPublished;
-}
-
-bool PublisherWrapper::publishData(const std::string& topic, const std::string payloadData, int nSeqNo){
-    bool bPublished = false;
-    try {
-        mqtt::message_ptr pubmsg = std::make_shared<mqtt::message>(payloadData);
-        pubmsg->set_qos(qos);
-        //Capturing here the timestamp to be more precise
-        long usec = getCurrentMicrosecond();
-        calc.addMessageSentTime(usec, nSeqNo);
-        //std::cout << "Message sent: " << usec << std::endl;
-        client.publish(topic, pubmsg)->wait_for_completion(timeout);
-        bPublished = true;
-    }
-    catch (const mqtt::exception& exc) {
-		std::cerr << "connectToBroker => Error: " << exc.what() << std::endl;
+		std::cerr << "Published Data => Error: " << exc.get_reason_code() << std::endl;
 		bPublished = false;
 	}
     return bPublished;
@@ -87,23 +74,27 @@ bool PublisherWrapper::disconnetFromBroker(){
     bool bDisconnect = false;
     try{
         // Disconnect
-#ifdef DEBUG_PUB                        
-        std::cout << "Disconnecting..." << std::flush;
-#endif        
+        if(debugLevel == 1){
+          std::cout << "Disconnecting Publisher..." << std::flush;
+        }
+  
         conntok = client.disconnect();
         conntok->wait_for_completion();
-#ifdef DEBUG_PUB                        
-        std::cout << "OK" << std::endl;
-#endif        
+
+        if(debugLevel == 1){
+            std::cout << "Publisher successfully disconnected" << std::endl;
+        }
+
         bDisconnect = true;
     }
     catch (const mqtt::exception& exc) {
-		std::cerr << "connectToBroker => Error: " << exc.what() << std::endl;
+		std::cerr << "DisconnectToBroker => Error: " << exc.what() << std::endl;
 		bDisconnect = false;
 	}
     return bDisconnect;
 }
 
+//This function is used for printing all the calulate stats
 void PublisherWrapper::printAllStats(){
     calc.printPStats();
 }

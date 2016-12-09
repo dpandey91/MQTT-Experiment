@@ -1,6 +1,7 @@
 {
-  "address" : "tcp://10.10.1.1:1883",
+  "address" : "tcp://localhost:1883",
   "topic" : "bg_load",
   "qos" : 0,
-  "timeout" : 10000
+  "debug" : 1,
+  "sendMessageWithTs" : 1
 }
