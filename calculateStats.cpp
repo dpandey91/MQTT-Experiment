@@ -135,10 +135,10 @@ void CalculateStats::printMessageArrivedTime(){
 
 void CalculateStats::printPStats(){
     printMessageSentTime();
-    printPInterarrivalTimes();
+    //printPInterarrivalTimes();
 }
 
 void CalculateStats::printCStats(){
     printMessageArrivedTime();
-    printCInterarrivalTimes();
+    //printCInterarrivalTimes();
 }

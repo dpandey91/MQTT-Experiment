@@ -58,7 +58,12 @@ int main(int argc, char* argv[]){
       std::cout << "SubscriberWrapper is successful" << std::endl;
     }
 
-    subscriberWrapper.printLatency();
+    if(bSendMsgWithTs){
+        subscriberWrapper.printLatency();
+    }
+    else{
+        subscriberWrapper.printAllStats();
+    }
     bRet = subscriberWrapper.disconnetFromBroker();
     if(!bRet){
         std::cout << "Failed to disconnet from broker" << std::endl;

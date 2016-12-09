@@ -7,6 +7,6 @@
   "timeout" : 10000,
   "dataRate" : 500,
   "noOfIterations" : 10,
-  "debug" : 1,
+  "debug" : 0,
   "sendMessageWithTs" : 1
 }

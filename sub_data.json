@@ -2,6 +2,6 @@
   "address" : "tcp://localhost:1883",
   "topic" : "bg_load",
   "qos" : 0,
-  "debug" : 1,
+  "debug" : 0,
   "sendMessageWithTs" : 1
 }
